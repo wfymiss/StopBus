@@ -13,24 +13,29 @@
     </com.amap.api.maps.MapView>
 
 
-
-        <com.xykj.fgy.stopcar.widgets.SimpleSearchView
-            android:id="@+id/me_search"
-            android:layout_width="wrap_content"
-            android:layout_gravity="center_horizontal"
-            android:layout_height="36dp"
-            android:layout_centerHorizontal="true"
-            android:layout_centerVertical="true">
-        </com.xykj.fgy.stopcar.widgets.SimpleSearchView>
+    <com.xykj.fgy.stopcar.widgets.SimpleSearchView
+        android:id="@+id/me_search"
+        android:layout_width="wrap_content"
+        android:layout_height="36dp"
+        android:layout_centerHorizontal="true"
+        android:layout_centerVertical="true"
+        android:layout_gravity="center_horizontal"></com.xykj.fgy.stopcar.widgets.SimpleSearchView>
 
 
     <ListView
         android:id="@+id/lv"
-        android:layout_gravity="bottom"
         android:layout_width="match_parent"
         android:layout_height="200dp"
-        android:visibility="gone"
-        ></ListView>
+        android:layout_gravity="bottom"
+        android:background="#449E9E9E"
+        android:visibility="gone"></ListView>
+
+    <ImageButton
+        android:id="@+id/good_ib"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="bottom|right"
+        android:background="@mipmap/ic_launcher" />
 
 
 </FrameLayout>

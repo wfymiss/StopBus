@@ -1,6 +1,7 @@
 package com.xykj.fgy.stopcar.fragment;
 
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
@@ -10,6 +11,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.Button;
+import android.widget.ImageButton;
 import android.widget.ListView;
 import android.widget.Toast;
 
@@ -28,11 +30,19 @@ import com.amap.api.maps.model.LatLng;
 import com.amap.api.maps.model.MarkerOptions;
 import com.amap.api.maps.model.MyLocationStyle;
 
+import com.amap.api.services.core.LatLonPoint;
 import com.amap.api.services.core.PoiItem;
 
 import com.amap.api.services.poisearch.PoiResult;
 import com.amap.api.services.poisearch.PoiSearch;
+import com.amap.api.services.route.BusRouteResult;
+import com.amap.api.services.route.DrivePath;
+import com.amap.api.services.route.DriveRouteResult;
+import com.amap.api.services.route.RideRouteResult;
+import com.amap.api.services.route.RouteSearch;
+import com.amap.api.services.route.WalkRouteResult;
 import com.xykj.fgy.stopcar.R;
+import com.xykj.fgy.stopcar.activity.OrdersActivity;
 import com.xykj.fgy.stopcar.adapter.PoiSearchAdapter;
 import com.xykj.fgy.stopcar.widgets.SimpleSearchView;
 
@@ -54,6 +64,8 @@ public class GoodFragment extends Fragment implements LocationSource, AMapLocati
     SimpleSearchView meSearch;
     @BindView(R.id.lv)
     ListView listView;
+    @BindView(R.id.good_ib)
+    ImageButton mImageButton;
     Unbinder unbinder;
     private AMap aMap;
     private PoiResult poiResult; // poi返回的结果
@@ -67,6 +79,10 @@ public class GoodFragment extends Fragment implements LocationSource, AMapLocati
     private boolean isFirstLoc = true;
     private double lon;
     private double lat;
+    private double latitude;
+    private double longitude;
+    //搜索到的数据集合
+    private ArrayList<PoiItem> poiItems;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -90,6 +106,7 @@ public class GoodFragment extends Fragment implements LocationSource, AMapLocati
             //设置定位监听
             aMap.setLocationSource(this);
             // 是否显示定位按钮
+            settings.setMyLocationButtonEnabled(true);
             settings.setZoomControlsEnabled(false);
             settings.setAllGesturesEnabled(true);
 
@@ -107,16 +124,70 @@ public class GoodFragment extends Fragment implements LocationSource, AMapLocati
             init();
             //搜索功能
             search();
-            setOnClick();
 
+            SetOnClick();
         }
     }
 
-    private void setOnClick() {
-
+    private void SetOnClick() {
+        listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                // 初始化对象
+                RouteSearch routeSearch = new RouteSearch(getContext());
+                // 设置数据回调监听器
+                routeSearch.setRouteSearchListener(listener);
+                // fromAndTo包含路径规划的起点和终点，drivingMode表示驾车模式
+                // 第三个参数表示途经点（最多支持16个），第四个参数表示避让区域（最多支持32个），第五个参数表示避让道路
+                LatLonPoint lonPoint = new LatLonPoint(latitude, longitude);
+                RouteSearch.FromAndTo fromAndTo = new RouteSearch.FromAndTo(lonPoint, poiItems.get(position).getLatLonPoint());
+                RouteSearch.DriveRouteQuery query = new RouteSearch.DriveRouteQuery(fromAndTo, 1, null, null, "");
+                routeSearch.calculateDriveRouteAsyn(query);
+            }
+        });
     }
 
+    // 设置数据回调监听器
+    private RouteSearch.OnRouteSearchListener listener = new RouteSearch.OnRouteSearchListener() {
+        @Override
+        public void onBusRouteSearched(BusRouteResult busRouteResult, int i) {
 
+        }
+
+        @Override
+        public void onDriveRouteSearched(DriveRouteResult result, int coode) {
+            if (coode == 1000) {
+                List<DrivePath> paths = result.getPaths();
+                for (int i = 0; i < paths.size(); i++) {
+                    Log.e("--------", paths.get(i).getRestriction() + "");
+                    Log.e("--------", paths.get(i).getStrategy() + "");
+                    Log.e("--------", paths.get(i).getSteps() + "");
+                    Log.e("--------", paths.get(i).getTollDistance() + "");
+                    Log.e("--------", paths.get(i).getTotalTrafficlights() + "");
+                }
+            }
+        }
+
+        @Override
+        public void onWalkRouteSearched(WalkRouteResult walkRouteResult, int i) {
+
+        }
+
+        @Override
+        public void onRideRouteSearched(RideRouteResult rideRouteResult, int i) {
+
+        }
+    };
+
+
+    // 地图上的图标
+    @OnClick(R.id.good_ib)
+    public void Onclick() {
+        Intent intent = new Intent(getActivity(), OrdersActivity.class);
+        startActivity(intent);
+    }
+
+    // poi检索 搜索功能
     private void search() {
         meSearch.setOnSearchListener(new SimpleSearchView.OnSearchListener() {
             private PoiSearch poiSearch;
@@ -131,23 +202,16 @@ public class GoodFragment extends Fragment implements LocationSource, AMapLocati
                 poiSearch = new PoiSearch(getActivity(), query);
                 Log.e("------", query + "");
                 poiSearch.setOnPoiSearchListener(new PoiSearch.OnPoiSearchListener() {
-
-
-                    private ArrayList<PoiItem> poiItems;
-
                     @Override
                     public void onPoiSearched(PoiResult poiResult, int errcode) {
                         Log.e("------", errcode + "");
                         if (errcode == 1000) {
                             if (null != poiResult && poiResult.getPois().size() > 0) {
                                 poiItems = poiResult.getPois();
-                                for (int i = 0; i < poiItems.size(); i++) {
-                                    aMap.addMarker(new MarkerOptions().position(new LatLng(lon, lat))
-                                            .title(poiItems.get(i).getSnippet())
-                                    );
-                                }
-
                             }
+                        } else {
+                            Toast.makeText(getContext(), "暂无数据", Toast.LENGTH_SHORT).show();
+                            return;
                         }
                         PoiSearchAdapter adapter = new PoiSearchAdapter(getActivity(), poiItems);
                         listView.setAdapter(adapter);
@@ -160,6 +224,7 @@ public class GoodFragment extends Fragment implements LocationSource, AMapLocati
                     }
                 });
                 poiSearch.searchPOIAsyn();
+                // 5秒后自动隐藏
                 listView.postDelayed(new Runnable() {
                     @Override
                     public void run() {
@@ -218,8 +283,10 @@ public class GoodFragment extends Fragment implements LocationSource, AMapLocati
             if (amapLocation.getErrorCode() == 0) {
                 //定位成功回调信息，设置相关消息
                 amapLocation.getLocationType();//获取当前定位结果来源，如网络定位结果，详见官方定位类型表
-                amapLocation.getLatitude();//获取纬度
-                amapLocation.getLongitude();//获取经度
+                //获取纬度
+                latitude = amapLocation.getLatitude();
+                //获取经度
+                longitude = amapLocation.getLongitude();
                 amapLocation.getAccuracy();//获取精度信息
                 SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
                 Date date = new Date(amapLocation.getTime());

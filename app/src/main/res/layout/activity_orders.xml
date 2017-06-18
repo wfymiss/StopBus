@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/activity_orders"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context="com.xykj.fgy.stopcar.activity.OrdersActivity">
+
+    <android.support.v7.widget.Toolbar
+        android:id="@+id/order_toolbar"
+        android:layout_width="match_parent"
+        android:layout_height="?attr/actionBarSize">
+
+        <TextView
+            android:id="@+id/order_title"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            android:layout_gravity="center"
+            android:text="@string/order"
+            android:textSize="20sp"
+            />
+
+    </android.support.v7.widget.Toolbar>
+
+    <LinearLayout
+        android:id="@+id/linear"
+        android:layout_width="match_parent"
+        android:layout_height="30dp"
+        android:layout_alignParentStart="true"
+        android:layout_below="@+id/order_toolbar"
+        android:orientation="horizontal">
+
+        <TextView
+            android:id="@+id/done"
+            style="@style/OrdersText"
+            android:text="@string/done" />
+
+        <TextView
+            android:id="@+id/undone"
+            style="@style/OrdersText"
+            android:text="@string/undone" />
+
+        <TextView
+            android:id="@+id/subscribe"
+            style="@style/OrdersText"
+            android:layout_width="0dp"
+            android:text="@string/subscribe" />
+    </LinearLayout>
+
+    <android.support.v4.view.ViewPager
+        android:id="@+id/order_vp"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_below="@+id/linear">
+
+    </android.support.v4.view.ViewPager>
+</RelativeLayout>

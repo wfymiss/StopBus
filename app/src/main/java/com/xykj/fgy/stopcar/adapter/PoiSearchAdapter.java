@@ -33,6 +33,7 @@ public class PoiSearchAdapter extends BaseAdapter {
     }
 
 
+
     @Override
     public int getCount() {
         return list.size();

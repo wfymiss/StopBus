@@ -39,8 +39,8 @@ public class MainActivity extends AppCompatActivity {
     private PagerFragment pagerFragment;
     private GoodFragment goodFragment;
     private MeFragment meFragment;
-    private FragmentManager fragmentManager;
-    private FragmentTransaction fragmentTransaction;
+    private FragmentTransaction transaction;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -52,21 +52,10 @@ public class MainActivity extends AppCompatActivity {
         // 初始化toolbar
         setSupportActionBar(toolbar);
         if (getSupportActionBar() != null) {
-            getSupportActionBar().setDisplayHomeAsUpEnabled(true);
             getSupportActionBar().setDisplayShowTitleEnabled(false);
         }
-
-        // 在主页面，默认显示的是热门仓库Fragment
         pagerFragment = new PagerFragment();
-        replaceFragment(pagerFragment);
-
-    }
-
-    private void replaceFragment(Fragment fragment) {
-        FragmentManager supportFragmentManager = getSupportFragmentManager();
-        fragmentTransaction = supportFragmentManager.beginTransaction();
-        fragmentTransaction.replace(R.id.ly_content, fragment);
-        fragmentTransaction.commit();
+        getSupportFragmentManager().beginTransaction().replace(R.id.ly_content, pagerFragment).commit();
     }
 
     //隐藏所有Fragment
@@ -78,28 +67,39 @@ public class MainActivity extends AppCompatActivity {
 
     @OnClick({R.id.pager_tv, R.id.stop_tv, R.id.me_tv})
     public void Onclick(TextView view) {
-        hideAllFragment(fragmentTransaction);
+        transaction = getSupportFragmentManager().beginTransaction();
+        hideAllFragment(transaction);
         switch (view.getId()) {
             case R.id.pager_tv:
+                title.setText(textViews[0].getText());
                 if (!pagerFragment.isAdded()) {
-                    replaceFragment(pagerFragment);
+                    transaction.add(R.id.ly_content, pagerFragment);
+                } else {
+                    transaction.show(pagerFragment);
                 }
                 break;
             case R.id.stop_tv:
+                title.setText(textViews[1].getText());
                 if (goodFragment == null) goodFragment = new GoodFragment();
                 if (!goodFragment.isAdded()) {
-                    replaceFragment(goodFragment);
+                    transaction.add(R.id.ly_content, goodFragment);
+                } else {
+                    transaction.show(goodFragment);
                 }
                 break;
             case R.id.me_tv:
+                title.setText(textViews[2].getText());
                 if (meFragment == null) {
                     meFragment = new MeFragment();
                 }
                 if (!meFragment.isAdded()) {
-                    replaceFragment(meFragment);
+                    transaction.add(R.id.ly_content, meFragment);
+                } else {
+                    transaction.show(meFragment);
                 }
                 break;
         }
+        transaction.commit();
     }
 
     /**
